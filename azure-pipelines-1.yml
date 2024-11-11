@@ -1,75 +1,83 @@
-# Starter pipeline
-# Start with a minimal pipeline that you can customize to build and deploy your code.
-# Add steps that build, run tests, deploy, and more:
-# https://aka.ms/yaml
+trigger:
+  branches:
+    include:
+      - main
 
 stages:
-- stage: Dev
-  jobs:
-  - job: Deploy
-    pool:
-      vmImage: 'windows-latest'
-    steps:
-    - task: DownloadBuildArtifacts@0
-      inputs:
-        buildType: 'specific'
-        project: '$(System.TeamProject)'
-        pipeline: '$(Build.DefinitionId)'
-        buildVersionToDownload: 'latest'
-        downloadPath: '$(System.ArtifactsDirectory)'
+  - stage: Build
+    displayName: "Build Solution"
+    jobs:
+      - job: BuildJob
+        steps:
+          - task: VSBuild@1
+            inputs:
+              solution: '**/*.sln'
+              msbuildArgs: '/p:Configuration=Release'
+          - task: CopyFiles@2
+            inputs:
+              contents: '**/*.dacpac'
+              targetFolder: '$(Build.ArtifactStagingDirectory)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'drop'
 
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: 'your-azure-subscription'
-        ServerName: 'your-server-name.database.windows.net'
-        DatabaseName: 'your-database-name'
-        SqlUsername: '$(sqlUsername)'
-        SqlPassword: '$(sqlPassword)'
-        DacpacFile: '$(System.ArtifactsDirectory)/drop/your-database.dacpac'
-        DeployType: 'DacpacTask'
-        DeploymentAction: 'Publish'
+  - stage: DeployToDev
+    displayName: "Deploy to Dev"
+    dependsOn: Build
+    jobs:
+      - deployment: DeployToDevJob
+        environment: "Dev"  # Specify the Dev environment for deployment
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: SqlAzureDacpacDeployment@1
+                  inputs:
+                    azureSubscription: "<Your-Azure-Service-Connection>"
+                    ServerName: "<Your-SQL-Server-Dev-Name>"
+                    DatabaseName: "<Your-Dev-Database-Name>"
+                    SqlUsername: "<Your-SQL-Username>"
+                    SqlPassword: "$(SQLPassword)" # Stored as a secret variable
+                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
+                    DeployType: "DacpacTask"
 
-    - task: ManualIntervention@1
-      inputs:
-        instructions: 'Please approve the deployment to QA.'
+  - stage: DeployToQA
+    displayName: "Deploy to QA"
+    dependsOn: DeployToDev
+    jobs:
+      - deployment: DeployToQAJob
+        environment: "QA"  # Specify the QA environment for deployment
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: SqlAzureDacpacDeployment@1
+                  inputs:
+                    azureSubscription: "<Your-Azure-Service-Connection>"
+                    ServerName: "<Your-SQL-Server-QA-Name>"
+                    DatabaseName: "<Your-QA-Database-Name>"
+                    SqlUsername: "<Your-SQL-Username>"
+                    SqlPassword: "$(SQLPassword)"
+                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
+                    DeployType: "DacpacTask"
 
-- stage: QA
-  dependsOn: Dev
-  jobs:
-  - job: Deploy
-    pool:
-      vmImage: 'windows-latest'
-    steps:
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: 'your-azure-subscription'
-        ServerName: 'your-server-name.database.windows.net'
-        DatabaseName: 'your-database-name'
-        SqlUsername: '$(sqlUsername)'
-        SqlPassword: '$(sqlPassword)'
-        DacpacFile: '$(System.ArtifactsDirectory)/drop/your-database.dacpac'
-        DeployType: 'DacpacTask'
-        DeploymentAction: 'Publish'
-
-    - task: ManualIntervention@1
-      inputs:
-        instructions: 'Please approve the deployment to Prod.'
-
-- stage: Prod
-  dependsOn: QA
-  jobs:
-  - job: Deploy
-    pool:
-      vmImage: 'windows-latest'
-    steps:
-    - task: SqlAzureDacpacDeployment@1
-      inputs:
-        azureSubscription: 'your-azure-subscription'
-        ServerName: 'your-server-name.database.windows.net'
-        DatabaseName: 'your-database-name'
-        SqlUsername: '$(sqlUsername)'
-        SqlPassword: '$(sqlPassword)'
-        DacpacFile: '$(System.ArtifactsDirectory)/drop/your-database.dacpac'
-        DeployType: 'DacpacTask'
-        DeploymentAction: 'Publish'
-
+  - stage: DeployToProd
+    displayName: "Deploy to Production"
+    dependsOn: DeployToQA
+    jobs:
+      - deployment: DeployToProdJob
+        environment: "Prod"  # Specify the Prod environment for deployment
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: SqlAzureDacpacDeployment@1
+                  inputs:
+                    azureSubscription: "<Your-Azure-Service-Connection>"
+                    ServerName: "<Your-SQL-Server-Prod-Name>"
+                    DatabaseName: "<Your-Prod-Database-Name>"
+                    SqlUsername: "<Your-SQL-Username>"
+                    SqlPassword: "$(SQLPassword)"
+                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
+                    DeployType: "DacpacTask"
