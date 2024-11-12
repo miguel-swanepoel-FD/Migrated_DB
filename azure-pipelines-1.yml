@@ -23,10 +23,10 @@ stages:
               artifactName: 'drop'
 
   - stage: DeployToDev
-    displayName: "Deploy to Dev"
+    displayName: "Deploy to QA"
     dependsOn: Build
     jobs:
-      - deployment: DeployToDevJob
+      - deployment: DeployToQAJob
         environment: "Dev"  # Specify the Dev environment for deployment
         strategy:
           runOnce:
@@ -34,50 +34,12 @@ stages:
               steps:
                 - task: SqlAzureDacpacDeployment@1
                   inputs:
-                    azureSubscription: "<Your-Azure-Service-Connection>"
-                    ServerName: "<Your-SQL-Server-Dev-Name>"
-                    DatabaseName: "<Your-Dev-Database-Name>"
-                    SqlUsername: "<Your-SQL-Username>"
-                    SqlPassword: "$(SQLPassword)" # Stored as a secret variable
-                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
+                    azureSubscription: "aut-azure-sponsorship"
+                    ServerName: "az-sql-mas2022-aut-sa-n"
+                    DatabaseName: "Internal.FD.PipelineDB.Demo"
+                    SqlUsername: "Miguel.Swanepoel@firsttech.digital"
+                    SqlPassword: "P05it1veP@55word" # Stored as a secret variable
+                    DacpacFile: "$(Pipeline.Workspace)/drop/Internal.FD.PipelineDB.Demo.dacpac"
                     DeployType: "DacpacTask"
 
-  - stage: DeployToQA
-    displayName: "Deploy to QA"
-    dependsOn: DeployToDev
-    jobs:
-      - deployment: DeployToQAJob
-        environment: "QA"  # Specify the QA environment for deployment
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: SqlAzureDacpacDeployment@1
-                  inputs:
-                    azureSubscription: "<Your-Azure-Service-Connection>"
-                    ServerName: "<Your-SQL-Server-QA-Name>"
-                    DatabaseName: "<Your-QA-Database-Name>"
-                    SqlUsername: "<Your-SQL-Username>"
-                    SqlPassword: "$(SQLPassword)"
-                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
-                    DeployType: "DacpacTask"
-
-  - stage: DeployToProd
-    displayName: "Deploy to Production"
-    dependsOn: DeployToQA
-    jobs:
-      - deployment: DeployToProdJob
-        environment: "Prod"  # Specify the Prod environment for deployment
-        strategy:
-          runOnce:
-            deploy:
-              steps:
-                - task: SqlAzureDacpacDeployment@1
-                  inputs:
-                    azureSubscription: "<Your-Azure-Service-Connection>"
-                    ServerName: "<Your-SQL-Server-Prod-Name>"
-                    DatabaseName: "<Your-Prod-Database-Name>"
-                    SqlUsername: "<Your-SQL-Username>"
-                    SqlPassword: "$(SQLPassword)"
-                    DacpacFile: "$(Pipeline.Workspace)/drop/<YourDatabase>.dacpac"
-                    DeployType: "DacpacTask"
+ 
