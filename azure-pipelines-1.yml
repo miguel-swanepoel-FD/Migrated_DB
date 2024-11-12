@@ -34,12 +34,12 @@ stages:
               steps:
                 - task: SqlAzureDacpacDeployment@1
                   inputs:
-                    azureSubscription: "aut-azure-sponsorship"
-                    ServerName: "az-sql-mas2022-aut-sa-n"
-                    DatabaseName: "Internal.FD.PipelineDB.Demo"
+                    azureSubscription: "vs-enterprise-mpn-miguel-swanepoel"
+                    ServerName: "ms-automation-sasol-pipeline-sql-dev"
+                    DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
                     SqlPassword: "P05it1veP@55word" # Stored as a secret variable
-                    DacpacFile: "$(Pipeline.Workspace)/drop/Internal.FD.PipelineDB.Demo.dacpac"
+                    DacpacFile: "$(Pipeline.Workspace)/drop/ms-automation-sasol-pipeline-sqldb-dev.dacpac"
                     DeployType: "DacpacTask"
 
  
