@@ -1,8 +1,3 @@
-trigger:
-  branches:
-    include:
-      - Dev
-
 stages:
   - stage: Build
     displayName: "Build Solution"
@@ -22,8 +17,7 @@ stages:
           - task: PublishBuildArtifacts@1
             inputs:
               pathToPublish: '$(Build.ArtifactStagingDirectory)'
-              artifactName: 'drop'
-
+              artifactName: 'drop'  # Ensure this matches the folder in DeployToDev stage
 
   - stage: DeployToDev
     displayName: "Deploy to QA"
@@ -40,12 +34,9 @@ stages:
                 - task: SqlAzureDacpacDeployment@1
                   inputs:
                     azureSubscription: "vs-enterprise-mpn-miguel-swanepoel (5cb7ba0e-90a4-4d6d-b238-f361039dc222)"
-                    ServerName: "ms-automation-sasol-pipeline-sql-dev.database.windows.net"  # Updated format"
+                    ServerName: "ms-automation-sasol-pipeline-sql-dev.database.windows.net"
                     DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
                     SqlPassword: "$(SqlPassword)"  # Store as a secret variable in the pipeline
                     DacpacFile: "$(Pipeline.Workspace)/drop/ms-automation-sasol-pipeline-sqldb-dev.dacpac"
                     DeployType: "DacpacTask"
-
-
- 
