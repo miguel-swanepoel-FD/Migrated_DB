@@ -8,6 +8,8 @@ stages:
     displayName: "Build Solution"
     jobs:
       - job: BuildJob
+        pool:
+          vmImage: 'windows-latest'  # Specify a Windows image
         steps:
           - task: VSBuild@1
             inputs:
@@ -21,6 +23,7 @@ stages:
             inputs:
               pathToPublish: '$(Build.ArtifactStagingDirectory)'
               artifactName: 'drop'
+
 
   - stage: DeployToDev
     displayName: "Deploy to QA"
