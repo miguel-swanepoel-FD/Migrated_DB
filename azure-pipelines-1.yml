@@ -1,3 +1,7 @@
+trigger:
+  branches:
+    include:
+      - Master  # Match the branch name exactly
 stages:
   - stage: Build
     displayName: "Build Solution"
