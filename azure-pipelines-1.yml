@@ -42,7 +42,7 @@ stages:
                     scriptType: "bash"
                     scriptLocation: "inlineScript"
                     inlineScript: |
-                      if [ ! -f "$(Pipeline.Workspace)/drop/ms-automation-sasol-pipeline-sqldb-dev.dacpac" ]; then
+                      if [ ! -f "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac" ]; then
                         echo "Error: .dacpac file not found. Aborting deployment."
                         exit 1
                       fi
