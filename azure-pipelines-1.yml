@@ -34,7 +34,7 @@ stages:
               steps:
                 - task: SqlAzureDacpacDeployment@1
                   inputs:
-                    azureSubscription: "vs-enterprise-mpn-miguel-swanepoel"
+                    azureSubscription: "vs-enterprise-mpn-miguel-swanepoel (5cb7ba0e-90a4-4d6d-b238-f361039dc222)"
                     ServerName: "ms-automation-sasol-pipeline-sql-dev"
                     DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
