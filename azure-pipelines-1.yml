@@ -31,6 +31,8 @@ stages:
     jobs:
       - deployment: DeployToQAJob
         environment: "Dev"  # Specify the Dev environment for deployment
+        pool:
+          vmImage: 'windows-latest'  # Ensure a Windows agent is used
         strategy:
           runOnce:
             deploy:
@@ -41,8 +43,9 @@ stages:
                     ServerName: "ms-automation-sasol-pipeline-sql-dev"
                     DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
-                    SqlPassword: "P05it1veP@55word" # Stored as a secret variable
+                    SqlPassword: "$(SqlPassword)"  # Store as a secret variable in the pipeline
                     DacpacFile: "$(Pipeline.Workspace)/drop/ms-automation-sasol-pipeline-sqldb-dev.dacpac"
                     DeployType: "DacpacTask"
+
 
  
