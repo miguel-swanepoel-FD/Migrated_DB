@@ -53,6 +53,6 @@ stages:
                     DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
                     SqlPassword: "$(SqlPassword)"  # Store as a secret variable in the pipeline
-                    DacpacFile: "$(Pipeline.Workspace)/drop/ms-automation-sasol-pipeline-sqldb-dev.dacpac"
+                    DacpacFile: "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac"
                     DeployType: "DacpacTask"
 
