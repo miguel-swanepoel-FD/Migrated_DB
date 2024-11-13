@@ -2,6 +2,7 @@ trigger:
   branches:
     include:
       - Master  # Match the branch name exactly
+
 stages:
   - stage: Build
     displayName: "Build Solution"
@@ -35,7 +36,18 @@ stages:
           runOnce:
             deploy:
               steps:
-
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifactName: 'drop'
+                    path: '$(Pipeline.Workspace)/drop'
+                
+                - task: CopyFiles@2
+                  displayName: "Copy .dacpac file to expected location"
+                  inputs:
+                    SourceFolder: '$(Pipeline.Workspace)/drop/bin/Release'
+                    Contents: 'DatabaseSolution.dacpac'
+                    TargetFolder: '$(Pipeline.Workspace)/drop'
+                
                 - task: SqlAzureDacpacDeployment@1
                   inputs:
                     azureSubscription: "vs-enterprise-mpn-miguel-swanepoel (5cb7ba0e-90a4-4d6d-b238-f361039dc222)"
@@ -43,6 +55,6 @@ stages:
                     DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
                     SqlUsername: "Miguel.Swanepoel@firsttech.digital"
                     SqlPassword: "$(SqlPassword)"  # Store as a secret variable in the pipeline
-                    DacpacFile: "$(Build.ArtifactStagingDirectory)/drop/DatabaseSolution.dacpac"
+                    DacpacFile: "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac"
                     DeployType: "DacpacTask"
 
