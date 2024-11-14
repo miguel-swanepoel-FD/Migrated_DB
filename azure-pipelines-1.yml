@@ -1,0 +1,60 @@
+trigger:
+  branches:
+    include:
+      - Dev # Match the branch name exactly
+
+stages:
+  - stage: Build
+    displayName: "Build Solution"
+    jobs:
+      - job: BuildJob
+        pool:
+          vmImage: 'windows-latest'  # Specify a Windows image
+        steps:
+          - task: VSBuild@1
+            inputs:
+              solution: '**/*.sln'
+              msbuildArgs: '/p:Configuration=Release'
+          - task: CopyFiles@2
+            inputs:
+              contents: '**/*.dacpac'
+              targetFolder: '$(Build.ArtifactStagingDirectory)'
+          - task: PublishBuildArtifacts@1
+            inputs:
+              pathToPublish: '$(Build.ArtifactStagingDirectory)'
+              artifactName: 'drop'  # Ensure this matches the folder in DeployToDev stage
+
+  - stage: DeployToDev
+    displayName: "Deploy to QA"
+    dependsOn: Build
+    jobs:
+      - deployment: DeployToQAJob
+        environment: "Dev"  # Specify the Dev environment for deployment
+        pool:
+          vmImage: 'windows-latest'  # Ensure a Windows agent is used
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - task: DownloadPipelineArtifact@2
+                  inputs:
+                    artifactName: 'drop'
+                    path: '$(Pipeline.Workspace)/drop'
+                
+                - task: CopyFiles@2
+                  displayName: "Copy .dacpac file to expected location"
+                  inputs:
+                    SourceFolder: '$(Pipeline.Workspace)/drop/bin/Release'
+                    Contents: 'DatabaseSolution.dacpac'
+                    TargetFolder: '$(Pipeline.Workspace)/drop'
+                
+                - task: SqlAzureDacpacDeployment@1
+                  inputs:
+                    azureSubscription: "vs-enterprise-mpn-miguel-swanepoel (5cb7ba0e-90a4-4d6d-b238-f361039dc222)"
+                    ServerName: "ms-automation-sasol-pipeline-sql-dev.database.windows.net"
+                    DatabaseName: "ms-automation-sasol-pipeline-sqldb-dev"
+                    SqlUsername: "MSAdmin"
+                    SqlPassword: "P05it1vity"  # Store as a secret variable in the pipeline
+                    DacpacFile: "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac"
+                    DeployType: "DacpacTask"
+
