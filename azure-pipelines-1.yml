@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - Master  # Match the branch name exactly
+      - master  # Match the branch name exactly
 
 stages:
   - stage: Build
