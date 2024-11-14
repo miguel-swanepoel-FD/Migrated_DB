@@ -1,7 +1,7 @@
 trigger:
   branches:
     include:
-      - Dev # Match the branch name exactly
+      - Dev  # Match the branch name exactly
 
 stages:
   - stage: Build
@@ -9,7 +9,7 @@ stages:
     jobs:
       - job: BuildJob
         pool:
-          vmImage: 'windows-latest'  # Specify a Windows image
+          vmImage: 'windows-latest'
         steps:
           - task: VSBuild@1
             inputs:
@@ -23,9 +23,10 @@ stages:
             inputs:
               pathToPublish: '$(Build.ArtifactStagingDirectory)'
               artifactName: 'drop'  # Ensure this matches the folder in DeployToDev stage
+
   - stage: Test
     displayName: "Run Tests"
-    dependsOn: Build
+    dependsOn: Build  # Run tests after Build stage completes
     jobs:
       - job: TestJob
         pool:
@@ -38,12 +39,12 @@ stages:
 
   - stage: DeployToDev
     displayName: "Deploy to QA"
-    dependsOn: Build
+    dependsOn: Test  # Deploy after Test stage completes
     jobs:
       - deployment: DeployToQAJob
         environment: "Dev"  # Specify the Dev environment for deployment
         pool:
-          vmImage: 'windows-latest'  # Ensure a Windows agent is used
+          vmImage: 'windows-latest'
         strategy:
           runOnce:
             deploy:
@@ -70,10 +71,9 @@ stages:
                     DacpacFile: "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac"
                     DeployType: "DacpacTask"
 
-
   - stage: PushToQA
     displayName: "Push Changes to QA Branch"
-    dependsOn: DeployToDev
+    dependsOn: DeployToDev  # Push only after DeployToDev completes
     condition: succeeded()  # Only push if previous stages succeed
     jobs:
       - job: PushJob
@@ -89,4 +89,4 @@ stages:
               git push origin QA  # Push changes to QA branch
             displayName: "Push changes to QA branch"
             env:
-              GIT_TOKEN: $(GIT_TOKEN)
+              GIT_TOKEN: $(GIT_TOKEN)  # Ensure this token is added as a secret variable in the pipeline settings
