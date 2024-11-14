@@ -70,3 +70,23 @@ stages:
                     DacpacFile: "$(Pipeline.Workspace)/drop/DatabaseSolution.dacpac"
                     DeployType: "DacpacTask"
 
+
+  - stage: PushToQA
+    displayName: "Push Changes to QA Branch"
+    dependsOn: DeployToDev
+    condition: succeeded()  # Only push if previous stages succeed
+    jobs:
+      - job: PushJob
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - checkout: self  # Ensure the repository is checked out
+          
+          - script: |
+              git config user.name "Azure DevOps"
+              git config user.email "devops@yourdomain.com"
+              git checkout -b QA  # Create QA branch if it doesn't exist
+              git push origin QA  # Push changes to QA branch
+            displayName: "Push changes to QA branch"
+            env:
+              GIT_TOKEN: $(GIT_TOKEN)
