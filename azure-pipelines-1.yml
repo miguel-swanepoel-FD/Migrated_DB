@@ -23,6 +23,18 @@ stages:
             inputs:
               pathToPublish: '$(Build.ArtifactStagingDirectory)'
               artifactName: 'drop'  # Ensure this matches the folder in DeployToDev stage
+  - stage: Test
+    displayName: "Run Tests"
+    dependsOn: Build
+    jobs:
+      - job: TestJob
+        pool:
+          vmImage: 'windows-latest'
+        steps:
+          - task: VSTest@2
+            inputs:
+              testSelector: 'testAssemblies'
+              testAssemblyVer2: '**\*test*.dll'
 
   - stage: DeployToDev
     displayName: "Deploy to QA"
