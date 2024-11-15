@@ -83,7 +83,7 @@ stages:
           steps:
               - checkout: self
               - script: |
-                  git config user.name "Miguel Swanepoel"
+                  git config user.name "miguel.swanepoel@firsttech.digital"
                   git config user.email "miguel.swanepoel@firsttech.digital"
                   git fetch origin
                   git checkout -B QA origin/QA || git checkout -b QA origin/Dev
