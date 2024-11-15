@@ -85,8 +85,8 @@ stages:
           - script: |
               git config user.name "Miguel Swanepoel"
               git config user.email "miguel.swanepoel@firsttech.digital"
-              git checkout QA
+              git fetch origin
+              git checkout -B QA origin/QA || git checkout -b QA origin/Dev
               git merge origin/Dev
               git push origin QA
             displayName: "Sync QA Branch"
-            
