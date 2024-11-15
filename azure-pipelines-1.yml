@@ -82,11 +82,13 @@ stages:
             vmImage: 'windows-latest'
           steps:
               - checkout: self
+                persistCredentials: true
               - script: |
                   git config user.name "miguelswanepoel"
                   git config user.email "miguel.swanepoel@firsttech.digital"
                   git fetch origin
                   git checkout -B QA origin/QA || git checkout -b QA origin/Dev
                   git merge origin/Dev
-                  git push https://FexpENjcZLsa92itqgtoiAMp2ne0CtSybWxJOBi5raZyObaVdLCWJQQJ99AKACAAAAAmBJvcAAASAZDOyj6@https://dev.azure.com/miguelswanepoel/Pipeline_DB/_git/Pipeline_DB QA
+                  git push https://FexpENjcZLsa92itqgtoiAMp2ne0CtSybWxJOBi5raZyObaVdLCWJQQJ99AKACAAAAAmBJvcAAASAZDOyj6@dev.azure.com/miguelswanepoel/Pipeline_DB/_git/Pipeline_DB QA
                 displayName: "Sync QA Branch"
+                
